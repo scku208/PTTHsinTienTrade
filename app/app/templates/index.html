@@ -1,0 +1,147 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://kit.fontawesome.com/d5e8e4447c.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='bulma.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='trade.css')}}" />
+</head>
+
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">PTT新店板 交易文章整合資訊 - 測試板</h1>
+            <p class="subtitle">祝大家都能找到需要的商品</p>
+        </div>
+    </section>
+    <section>
+        <div class="container">
+            <div class="mx-5 field">
+                <p class="control">
+                    <input disabled class="input" type="text" placeholder="*未來規劃* 輸入作者、標題、內容等關鍵字進行搜尋…">
+                </p>
+            </div>
+            <div class="columns m-3 is-multiline is-mobile">
+                {% for (aid, post) in PICKED_POSTS.items() %}
+                {% set desc = post.content.strip('\n').split('\n')[:3]+['...'] %}
+                <div class="column is-4-fullhd is-6-tablet is-12-mobile">
+                    <div class="box">
+                        <h3 class="title is-size-5">
+                            {{ post.title[4:] }}
+                        </h3>
+                        <p class="subtitle mb-2 is-size-7 has-text-right">{{ post.author.split(' ', 1)[0] }}, {{ post.date }}</p>
+                        <div id="box_{{aid}}" style="position:relative;">
+                            {% if post.img_urls %}
+                            {% for url in post.img_urls %}
+                            <figure class="image is-16by9 ku_img_slide ku_img_fade">
+                                <div class="{{ 'is-hidden' if post.img_urls|length == 1 }} ku_img_num is-size-7 px-1">{{ loop.index }} / {{ loop.length }}</div>
+                                <img style="border-radius: 15px;object-fit: cover;width: 100%;" src="{{ url|default('https://via.placeholder.com/320x180', True) }}">
+                            </figure>
+                            {% endfor %}
+                            {% if post.img_urls|length == 1 %}
+                            <div style="display: none;">
+                                {% endif %}
+                                <i class="is-size-4 p-2 is-clickable fa-solid fa-angle-left ku_img_slide_left_arrow" onclick="plusSlides(-1, '{{ post.aid }}')"></i>
+                                <i class="is-size-4 p-2 is-clickable fa-solid fa-angle-right ku_img_slide_right_arrow" onclick="plusSlides(1, '{{ post.aid }}')"></i>
+                                <span class="ku_img_dots">
+                                    {% for url in post.img_urls %}
+                                    <i class="is-clickable is-size-6 m-1 fa-solid fa-circle ku_img_dot" onclick="currentSlide({{ loop.index }}, '{{ post.aid }}')"></i>
+                                    {% endfor %}
+                                </span>
+                                {% if post.img_urls|length == 1 %}
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <figure class="image is-16by9 ku_img_slide ku_img_fade">
+                                <img style="border-radius: 15px;object-fit: cover;width: 100%;" src="{{ ''|default('https://via.placeholder.com/320x180', True) }}">
+                            </figure>
+                            <div style="display: none;">
+                                <i class="is-size-4 p-2 is-clickable fa-solid fa-angle-left ku_img_slide_left_arrow" onclick="plusSlides(-1, '{{ post.aid }}')"></i>
+                                <i class="is-size-4 p-2 is-clickable fa-solid fa-angle-right ku_img_slide_right_arrow" onclick="plusSlides(1, '{{ post.aid }}')"></i>
+                                <span class="ku_img_dots">
+                                    <i class="is-clickable is-size-6 m-1 fa-solid fa-circle ku_img_dot" onclick="currentSlide({{ loop.index }}, '{{ post.aid }}')"></i>
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <p class='is-size-7 mt-3'>{{ desc[0] }}<br>{{ desc[1] }}<br>{{ desc[2] }}<br>{{ desc[3] }}</p>
+                        <div class="mb-4 tags are-normal">
+                            <span class="tag is-light">面交</span>
+                            <span class="tag is-warning is-light">郵寄</span>
+                            <span class="tag is-success is-light">站內信</span>
+                            <span class="tag is-info is-light">議價</span>
+                        </div>
+                        <div class="has-text-centered">
+                            <button class="button mb-2 is-size-7 is-light is-link js-modal-trigger has-text-weight-bold" data-target="{{post.aid}}">
+                                詳細內容
+                            </button>
+                            <a href="{{post.web_url}}" class="button mb-2 ml-3 is-size-7 is-light is-info">
+                                ptt網頁版
+                                <i class="ml-1 fa-solid fa-up-right-from-square"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div id='{{post.aid}}' class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-card">
+                            <header class="modal-card-head">
+                                <p class="modal-card-title">{{ post.title }}</p>
+                                <button class="delete" aria-label="close"></button>
+                            </header>
+                            <section class="modal-card-body">
+                                <div class="content">
+                                    {% for line in post.content.strip('\n').splitlines() %}
+                                    {{line}}<br>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                            <footer class="modal-card-foot">
+                                <p class="is-size-7">{{ post.author.split(' ', 1)[0] }}, {{ post.date }}</p>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</body>
+<script src="{{url_for('static', filename='trade.js')}}"></script>
+<script type="text/javascript">
+var slideIndex_array = { { % for (aid, post) in PICKED_POSTS.items() % }
+    "{{ aid }}": 1,
+    { % endfor % }
+};
+
+Object.keys(slideIndex_array).map(function(objectKey, index) {
+    showSlides(slideIndex_array[objectKey], objectKey);
+});
+
+function plusSlides(n, aid) {
+    showSlides(slideIndex_array[aid] += n, aid);
+}
+
+function currentSlide(n, aid) {
+    showSlides(slideIndex_array[aid] = n, aid);
+}
+
+function showSlides(n, aid) {
+    var i;
+    // var slides = document.getElementsByClassName("ku_img_slide");
+    var slides = document.getElementById("box_" + aid).getElementsByClassName('ku_img_slide');
+    var dots = document.getElementById("box_" + aid).getElementsByClassName("ku_img_dot");
+    if (n > slides.length) { slideIndex_array[aid] = 1 }
+    if (n < 1) { slideIndex_array[aid] = slides.length }
+    for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+    for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" ku_img_dot_active", "");
+    }
+    slides[slideIndex_array[aid] - 1].style.display = "block";
+    dots[slideIndex_array[aid] - 1].className += " ku_img_dot_active";
+}
+</script>
+
+</html>

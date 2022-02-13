@@ -1,0 +1,15 @@
+name: app
+
+channels:
+  - conda-forge
+  - anaconda
+  
+dependencies:
+  - pandas
+  - uwsgi
+  - flask
+  - openpyxl
+  - xlrd
+  - pip
+  - pip:
+    - PyPtt
